@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.SortWith;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -26,6 +27,12 @@ import org.junit.tests.experimental.rules.RuleFieldValidatorTest.TestWithProtect
 public class ParentRunnerTest {
     public static String log = "";
 
+    /*
+     * Adding SortWith here because MethodSorter is no longer used when creating a test case.
+     * So if no sorting method is specified, the test methods will be executed in JVM order,
+     * which has chance to produce randomness to fail this test case.
+     */
+    @SortWith
     public static class FruitTest {
         @Test
         public void apple() {
@@ -41,7 +48,8 @@ public class ParentRunnerTest {
     @Test
     public void useChildHarvester() throws InitializationError {
         log = "";
-        ParentRunner<?> runner = new BlockJUnit4ClassRunner(FruitTest.class);
+        Request request = Request.aClass(FruitTest.class);
+        ParentRunner<?> runner = (ParentRunner<?>)request.getRunner();
         runner.setScheduler(new RunnerScheduler() {
             public void schedule(Runnable childStatement) {
                 log += "before ";
